@@ -2,6 +2,7 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.core.cache import cache  # Use Redis cache for storing driver locations
 
+
 class RideTrackingConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         """
@@ -29,7 +30,11 @@ class RideTrackingConsumer(AsyncWebsocketConsumer):
         longitude = data["longitude"]
 
         # Store driver location in Redis cache (TTL: 10 minutes)
-        cache.set(f"driver_location_{self.ride_id}", {"lat": latitude, "lon": longitude}, timeout=600)
+        cache.set(
+            f"driver_location_{self.ride_id}",
+            {"lat": latitude, "lon": longitude},
+            timeout=600,
+        )
 
         # Broadcast location update to all clients
         await self.channel_layer.group_send(
@@ -38,14 +43,18 @@ class RideTrackingConsumer(AsyncWebsocketConsumer):
                 "type": "send_location_update",
                 "latitude": latitude,
                 "longitude": longitude,
-            }
+            },
         )
 
     async def send_location_update(self, event):
         """
         Send real-time location update to all connected clients.
         """
-        await self.send(text_data=json.dumps({
-            "latitude": event["latitude"],
-            "longitude": event["longitude"],
-        }))
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "latitude": event["latitude"],
+                    "longitude": event["longitude"],
+                }
+            )
+        )

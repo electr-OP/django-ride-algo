@@ -81,7 +81,8 @@ socket.onmessage = (event) => console.log("Live update:", event.data);
 ---
 
 ## **📌 API Documentation**  
-Swagger Docs: `http://localhost:8000/docs/`  
+Swagger Docs: `http://localhost:8060/docs/`  
+ReDoc: `http://localhost:8000/redoc/`
 
 ---
 

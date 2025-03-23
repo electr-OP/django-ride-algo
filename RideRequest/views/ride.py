@@ -9,6 +9,7 @@ from RideMatching.models import Driver
 from RideRequest.serializers import RideRequestSerializer, NavigationRequestSerializer
 from Utils.gmaps import get_eta, calculate_driver_score, get_optimal_route
 
+
 class RideMatchingView(APIView):
     """
     API view to match ride requests with drivers
@@ -26,11 +27,11 @@ class RideMatchingView(APIView):
             print(pickup_location)
 
             # Fetch nearby available drivers
-            nearby_drivers = Driver.objects.filter(
-                status="available"
-            ).annotate(
-                distance=Distance("location", pickup_location)
-            ).order_by("distance")[:10]  # Get top 10 closest drivers
+            nearby_drivers = (
+                Driver.objects.filter(status="available")
+                .annotate(distance=Distance("location", pickup_location))
+                .order_by("distance")[:10]
+            )  # Get top 10 closest drivers
 
             best_driver = None
             best_score = -1
@@ -44,17 +45,27 @@ class RideMatchingView(APIView):
                     best_driver = driver
 
             if best_driver:
-                return Response({"message": "Driver found", "driver": {"id": best_driver.id, "name": best_driver.name}}, status=status.HTTP_200_OK)
+                return Response(
+                    {
+                        "message": "Driver found",
+                        "driver": {"id": best_driver.id, "name": best_driver.name},
+                    },
+                    status=status.HTTP_200_OK,
+                )
             else:
-                return Response({"message": "No suitable driver found"}, status=status.HTTP_404_NOT_FOUND)
+                return Response(
+                    {"message": "No suitable driver found"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    
+
 class RideNavigationView(APIView):
     """
     API to determine the optimal route for ride.
     """
+
     def post(self, request):
         serializer = NavigationRequestSerializer(data=request.data)
         if serializer.is_valid():
@@ -69,8 +80,8 @@ class RideNavigationView(APIView):
             if route:
                 return Response({"route": route}, status=status.HTTP_200_OK)
             else:
-                return Response({"message": "No route found"}, status=status.HTTP_404_NOT_FOUND)
+                return Response(
+                    {"message": "No route found"}, status=status.HTTP_404_NOT_FOUND
+                )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    

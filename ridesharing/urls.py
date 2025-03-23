@@ -20,19 +20,36 @@ from django.urls import path
 from django.urls.conf import include
 from django.conf.urls.static import static
 from django.conf import settings
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from rest_framework import permissions
 
+# Swagger UI
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Ride Sharing Algorithm API",
+        default_version="v1",
+        description="API documentation for the ride-sharing Algorithm",
+        terms_of_service="https://www.ridesharing.com/terms/",
+        contact=openapi.Contact(email="support@ridesharing.com"),
+        license=openapi.License(name="MIT License"),
+    ),
+    public=True,
+    permission_classes=[permissions.AllowAny],
+)
+# URL patterns
 urlpatterns = [
+    # Swagger UI
+    path(
+        "swagger/", schema_view.with_ui("swagger", cache_timeout=0), name="swagger-ui"
+    ),
+    path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="redoc-ui"),
     # Admin URL
     path("admin/", admin.site.urls),
     # API URLs
     path("api/ride/", include("RideRequest.urls"), name="ride"),
-    
-
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if bool(settings.DEBUG):
-    urlpatterns += static(settings.STATIC_URL,
-                        document_root=settings.STATIC_ROOT)
-    urlpatterns += static(settings.MEDIA_URL,
-                          document_root=settings.MEDIA_ROOT)
-    
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
